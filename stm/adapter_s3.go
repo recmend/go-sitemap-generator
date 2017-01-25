@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
@@ -17,7 +16,6 @@ type S3Adapter struct {
 	Region string
 	Bucket string
 	ACL    string
-	Creds  *credentials.Credentials
 }
 
 // Write will create sitemap xml file into the s3.
@@ -37,14 +35,7 @@ func (adp *S3Adapter) Write(loc *Location, data []byte) {
 		}()
 	}
 
-	creds := adp.Creds
-	if creds == nil {
-		creds = credentials.NewEnvCredentials()
-	}
-	creds.Get()
-
-	sess := session.New(&aws.Config{
-		Credentials: creds, Region: &adp.Region})
+	sess := session.New(&aws.Config{Region: &adp.Region})
 
 	uploader := s3manager.NewUploader(sess)
 	_, err := uploader.Upload(&s3manager.UploadInput{
